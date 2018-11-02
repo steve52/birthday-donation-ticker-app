@@ -11,18 +11,38 @@ const promise = mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost
   useNewUrlParser: true,
 });
 
+async function getDonationTotal(DonationModel) {
+  const smooshedModels = await DonationModel.aggregate([
+    {
+      $group: {
+        _id: '',
+        total: {
+          $sum: '$amount',
+        },
+      },
+    },
+  ]);
+  return smooshedModels[0].total;
+}
+
 promise.then(() => {
   console.log('Connected to mongodb');
 
   const wss = new WebSocket.Server({port: 8080});
 
+  // On first websocket connection from a client do the following
   wss.on('connection', (ws) => {
-    ws.on('message', (message) => {
-      console.log('received %s', message);
+    console.log('Websocket open with a client');
+
+    getDonationTotal(Donation).then((total) => {
+      console.log('Send current total to client');
+      ws.send(JSON.stringify({
+        message: 'current_total',
+        total,
+      }));
+    }).catch((err) => {
+      console.log(err);
     });
-    ws.send(JSON.stringify({
-      message: 'something',
-    }));
   });
 
   broadcastNewDonation = (data) => {
@@ -53,28 +73,28 @@ promise.then(() => {
   app.use(bodyParser.urlencoded({extended: true}));
 
   app.post('/donations', (req, res) => {
-    console.log('req.body', req.body);
+    console.log('Got a new donation', req.body);
     const newDonation = new Donation(req.body);
     newDonation.save()
-        .then((donation) => {
-          console.log('donation', donation);
-          Donation.find({}, (err, donations) => {
-            if (err) res.send(err);
-            const total = donations.reduce((acc, curr) => {
-              return acc + curr.amount;
-            }, 0);
-            const data = {
-              message_type: 'new_donation',
-              donation,
-              total,
-            };
-            broadcastNewDonation(JSON.stringify(data));
-          });
-          res.send(`donation saved to database: ${newDonation}`);
-        })
-        .catch((err) => {
-          res.status(400).send('undable to save to database');
+      .then((donation) => {
+        console.log('donation', donation);
+        getDonationTotal(Donation).then((total) => {
+          const data = {
+            message_type: 'new_donation',
+            donation,
+            total,
+          };
+          console.log('Broadcast new total and donation', data);
+          broadcastNewDonation(JSON.stringify(data));
+        }).catch((err) => {
+          console.log('err', err);
         });
+      });
+      res.send(`donation saved to database: ${newDonation}`);
+    })
+    .catch((err) => {
+      res.status(400).send('undable to save to database');
+    });
   });
 
   app.get('/donations', (req, res) => {
