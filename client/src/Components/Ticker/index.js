@@ -10,17 +10,16 @@ export default class Ticker extends Component {
   }
   componentDidMount() {
     const ws = new WebSocket('ws://localhost:8080');
+    // Event listener for recieving websocket messages from the server
     ws.addEventListener('message', (message) => {
+      console.log('message', message);
       const data = JSON.parse(message.data);
-      if (data.message_type === 'new_donation') {
+      // if (data.message_type === 'new_donation') {
         this.setState({
           total: data.total,
-          last_donation: {
-            name: data.donation.name,
-            amount: data.donation.amount,
-          }
+          last_donation: data.donation
         })
-      }
+      // }
     });
   }
   render() {

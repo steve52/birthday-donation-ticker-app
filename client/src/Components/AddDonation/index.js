@@ -6,7 +6,10 @@ export default class AddDonation extends Component {
     console.log('HELLLLOO')
     this.state = {
       name: '',
-      amount: ''
+      amount: '',
+      sending: false,
+      sent: true,
+      showForm: true
     }
   }
   handleNameChange = (event) => {
@@ -23,36 +26,59 @@ export default class AddDonation extends Component {
       name: this.state.name,
       amount: this.state.amount
     }
+    this.setState({
+      showForm: false,
+      sending: true
+    })
     fetch('http://localhost:5000/donations', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(formData)
     })
-    .then(response => response.json())
-    .then(response => console.log('Success:', JSON.stringify(response)))
+    .then(response => {
+      console.log('Success:', response)
+      this.setState({
+        showForm: false,
+        sending: false,
+        name: '',
+        amount: ''
+      })
+    })
     .catch(error => console.error('Error:', error));
   }
 
   render() {
+
+    let content;
+      if (this.state.showForm) {
+        content = (
+          <form onSubmit={this.onSubmit}>
+            Name: <input name="name" type="text" value={this.state.name} onChange={this.handleNameChange} />
+            Amount: <input name="amount" type="number" value={this.state.amount} onChange={this.handleAmountChange} />
+            <button type="submit">Submit</button>
+          </form>
+        )
+      } else if (this.state.sending) {
+        content = (
+          <div>Sending...</div>
+        );
+      } else {
+        setTimeout(() => {
+          this.setState({
+            showForm: true
+          })
+        }, 2000);
+        content = (
+          <div>Thanks for the donation!</div>
+        );
+      }
     return (
       <div>
         <h1>Add a Donation</h1>
-
-        <form onSubmit={this.onSubmit}>
-          Name: <input name="name" type="text" value={this.state.name} onChange={this.handleNameChange} />
-          Amount: <input name="amount" type="number" value={this.state.amount} onChange={this.handleAmountChange} />
-          <button type="submit">Submit</button>
-        </form>
+          {content}
       </div>
     )
   }
 }
-
-
-// <button onClick={this.onClick}>$1</button>
-// <button onClick={this.onClick}>$2</button>
-// <button onClick={this.onClick}>$3</button>
-// <button onClick={this.onClick}>$5</button>
-// <button onClick={this.onClick}>$10</button>
-// <button onClick={this.onClick}>$20</button>
-// <button onClick={this.onClick}>$50</button>
-// <button onClick={this.onClick}>$100</button>
