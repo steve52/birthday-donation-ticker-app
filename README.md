@@ -38,4 +38,4 @@ Open a browser open http://localhost:3000/ in one tab and http://localhost:3000/
 * /add - This is where you can enter new donations
 
 ## To deploy to heroku
-Deploying to heroku is pretty simple. There are some pretty good instructions here. You'll need to set up a heroku account. 
+If you have a Heroku account, deploying to the web is pretty simple. Here are some good instructions on that: https://devcenter.heroku.com/articles/getting-started-with-nodejs#deploy-the-app
