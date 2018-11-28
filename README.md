@@ -5,6 +5,7 @@ App built with MERN Stack (Mongo, Express, React, Node)
 ## To run locally
 You'll need three terminal tabs open - one for the db, one for the api, and one for the react app
 
+### Requirements
 You'll need to have npm installed and mongoDB
 
 ### Start MongoDB
@@ -30,8 +31,11 @@ $ npm start
 
 Open a browser open http://localhost:3000/ in one tab and http://localhost:3000/add in another
 
-Routes: 
+## Routes 
 
-/ - This is where the total donation amount appears and shoutouts for new donations as they come in
+* / - This is where the total donation amount appears and shoutouts for new donations as they come in
 
-/add - This is where you can enter new donations
+* /add - This is where you can enter new donations
+
+## To deploy to heroku
+Deploying to heroku is pretty simple. There are some pretty good instructions here. You'll need to set up a heroku account. 
